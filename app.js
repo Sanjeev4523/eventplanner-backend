@@ -7,17 +7,33 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const EVENTS_DATABASE = ["Cooking", "Coding", "GraphQL Conf", "MongoDB"];
+const EVENTS_DATABASE = [];
+
 app.use(
   "/graphql",
   graphqlHTTP({
     schema: buildSchema(`
+        type Event {
+            _id: ID!
+            title: String!
+            description: String!
+            price: Float!
+            date: String!
+        }
+
+        input EventInput {
+            title: String!
+            description: String!
+            price: String!
+            date: String!
+        }
+    
         type RootQuery {
-            events: [String!]!
+            events: [Event!]!
         }
 
         type RootMutation {
-            createEvent(name: String): String
+            createEvent(eventInput: EventInput): Event
         }
 
         schema {
@@ -30,9 +46,16 @@ app.use(
         return EVENTS_DATABASE;
       },
       createEvent: (args) => {
-        const eventName = args.name;
-        EVENTS_DATABASE.push(eventName);
-        return `${eventName} was successfully created`;
+        const { title, description, price, date } = args.eventInput;
+        const event = {
+          _id: Math.random().toString(),
+          title,
+          description,
+          price: +price,
+          date: date,
+        };
+        EVENTS_DATABASE.push(event);
+        return event;
       },
     },
     graphiql: true,
