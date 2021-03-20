@@ -16,10 +16,10 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  if(req.method === 'OPTIONS'){
-    return res.sendStatus(200)
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
   }
-  next()
+  next();
 });
 
 app.use(isAuth);
@@ -36,7 +36,10 @@ app.use(
 const conncetionString = `mongodb://localhost:27017/${process.env.MONGO_DB}`;
 console.log(conncetionString);
 mongoose
-  .connect(conncetionString)
+  .connect(conncetionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     app.listen(5000);
   })
