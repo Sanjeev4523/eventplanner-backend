@@ -1,11 +1,11 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const User = require("../../models/user");
 
 module.exports = {
   createUser: async (args) => {
     const { email, password } = args.userInput;
-    // Check if user already exists
     try {
       const existingUser = await User.findOne({ email });
       if (existingUser) {
@@ -25,5 +25,30 @@ module.exports = {
       console.log(err);
       throw err;
     }
+  },
+  login: async ({ email, password }) => {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("User Does Not Exist!");
+    }
+    const isEqual = await bcrypt.compare(password, user.password);
+    if (!isEqual) {
+      throw new Error("Password is Incorrect");
+    }
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+      },
+      "dogecoinToTheMoon",
+      {
+        expiresIn: "1h",
+      }
+    );
+    return {
+      userId: user.id,
+      token,
+      tokenExpiration: 1,
+    };
   },
 };
